@@ -40,11 +40,13 @@ public class GenerateLevel : MonoBehaviour
     Material blueMaterial;
 
     Random random;
+    Grid3D<CellType> grid;
     List<Room> rooms;
 
     void Start()
     {
-        random = new Random();
+        random = new Random(0);
+        grid = new Grid3D<CellType>(levelSize, Vector3Int.zero);
         rooms = new List<Room>();
 
         generateRooms();
@@ -66,8 +68,50 @@ public class GenerateLevel : MonoBehaviour
                 random.Next(1, roomMaxSize.z + 1)
             );
 
-            bool canPutRoom = true;
+            bool canPlaceRoom = true;
+            Room newRoom = new Room(location, roomSize);
+            Room buffer = new Room(location + new Vector3Int(-1, 0, -1), roomSize + new Vector3Int(2, 0, 2));
+
+            foreach (var room in rooms)
+            {
+                if (room.intersects(buffer))
+                {
+                    canPlaceRoom = false;
+                    break;
+                }
+            }
+
+            if (newRoom.bounds.xMin < 0 || newRoom.bounds.xMax >= levelSize.x
+                || newRoom.bounds.yMin < 0 || newRoom.bounds.yMax >= levelSize.y
+                || newRoom.bounds.zMin < 0 || newRoom.bounds.zMax >= levelSize.z)
+            {
+                canPlaceRoom = false;
+            }
+
+            if (canPlaceRoom)
+            {
+                rooms.Add(newRoom);
+                PlaceRoom(newRoom.bounds.position, newRoom.bounds.size);
+
+                foreach (var pos in newRoom.bounds.allPositionsWithin)
+                {
+                    grid[pos] = CellType.Room;
+                }
+            }
         }
+
+        void PlaceCube(Vector3Int location, Vector3Int size, Material material)
+        {
+            GameObject go = Instantiate(cubePrefab, location, Quaternion.identity);
+            go.GetComponent<Transform>().localScale = size;
+            go.GetComponent<MeshRenderer>().material = material;
+        }
+
+        void PlaceRoom(Vector3Int location, Vector3Int size)
+        {
+            PlaceCube(location, size, redMaterial);
+        }
+
 
     }
 }
