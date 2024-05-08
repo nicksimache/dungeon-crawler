@@ -20,9 +20,9 @@ public class GenerateLevel : MonoBehaviour
         }
 
         public bool intersects(Room other) {
-            return !((this.bounds.position.x <= other.bounds.position.x + other.bounds.size.x) && (this.bounds.position.x + this.bounds.size.x >= other.bounds.position.x) &&
-                     (this.bounds.position.y <= other.bounds.position.y + other.bounds.size.y) && (this.bounds.position.y + this.bounds.size.y >= other.bounds.position.y) &&
-                     (this.bounds.position.z <= other.bounds.position.z + other.bounds.size.z) && (this.bounds.position.z + this.bounds.size.z >= other.bounds.position.z));
+            return (this.bounds.position.x <= other.bounds.position.x + other.bounds.size.x) && (this.bounds.position.x + this.bounds.size.x >= other.bounds.position.x) &&
+                   (this.bounds.position.y <= other.bounds.position.y + other.bounds.size.y) && (this.bounds.position.y + this.bounds.size.y >= other.bounds.position.y) &&
+                   (this.bounds.position.z <= other.bounds.position.z + other.bounds.size.z) && (this.bounds.position.z + this.bounds.size.z >= other.bounds.position.z);
         }
     }
 
@@ -45,7 +45,7 @@ public class GenerateLevel : MonoBehaviour
 
     void Start()
     {
-        random = new Random(0);
+        random = new Random();
         grid = new Grid3D<CellType>(levelSize, Vector3Int.zero);
         rooms = new List<Room>();
 
