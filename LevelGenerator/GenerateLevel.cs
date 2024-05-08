@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = System.Random;
 
 public class GenerateLevel : MonoBehaviour
@@ -58,7 +59,7 @@ public class GenerateLevel : MonoBehaviour
         {
             Vector3Int location = new Vector3Int(
                 random.Next(0, levelSize.x),
-                random.Next(0, levelSize.y),
+                0,
                 random.Next(0, levelSize.z)
             );
 
