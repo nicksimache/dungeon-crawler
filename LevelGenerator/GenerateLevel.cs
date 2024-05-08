@@ -1,3 +1,28 @@
+/* Adapted from https://github.com/vazgriz/DungeonGenerator
+
+Copyright (c) 2019 Ryan Vazquez
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.*/
+
+using Graphs;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -43,6 +68,8 @@ public class GenerateLevel : MonoBehaviour
     Random random;
     Grid3D<CellType> grid;
     List<Room> rooms;
+    Delaunay delaunay;
+    //HashSet<Prim.Edge> selectedEdges;
 
     void Start()
     {
@@ -51,6 +78,7 @@ public class GenerateLevel : MonoBehaviour
         rooms = new List<Room>();
 
         generateRooms();
+        triangulate();
     }
 
     void generateRooms()
@@ -101,18 +129,30 @@ public class GenerateLevel : MonoBehaviour
             }
         }
 
-        void PlaceCube(Vector3Int location, Vector3Int size, Material material)
+    }
+
+    void triangulate()
+    {
+        List<Graphs.Vertex> vertices = new List<Graphs.Vertex>();
+
+        foreach (var room in rooms)
         {
-            GameObject go = Instantiate(cubePrefab, location, Quaternion.identity);
-            go.GetComponent<Transform>().localScale = size;
-            go.GetComponent<MeshRenderer>().material = material;
+            vertices.Add(new Vertex<Room>((Vector3)room.bounds.position + ((Vector3)room.bounds.size) / 2, room));
         }
 
-        void PlaceRoom(Vector3Int location, Vector3Int size)
-        {
-            PlaceCube(location, size, redMaterial);
-        }
+        delaunay = Delaunay.Triangulate(vertices);
 
+    }
 
+    void PlaceCube(Vector3Int location, Vector3Int size, Material material)
+    {
+        GameObject go = Instantiate(cubePrefab, location, Quaternion.identity);
+        go.GetComponent<Transform>().localScale = size;
+        go.GetComponent<MeshRenderer>().material = material;
+    }
+
+    void PlaceRoom(Vector3Int location, Vector3Int size)
+    {
+        PlaceCube(location, size, redMaterial);
     }
 }
