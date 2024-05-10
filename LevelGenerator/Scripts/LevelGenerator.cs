@@ -4,6 +4,8 @@ using UnityEngine;
 using Random = System.Random;
 using Graphs;
 using UnityEngine.UIElements;
+using UnityEngine.UI;
+
 
 public class Generator2D : MonoBehaviour
 {
@@ -68,7 +70,7 @@ public class Generator2D : MonoBehaviour
 
     void PlaceRooms()
     {
-        for (int i = 0; i < roomCount; i++)
+        while(roomCount > 0)
         {
             Vector2Int location = new Vector2Int(
                 random.Next(0, size.x),
@@ -76,8 +78,8 @@ public class Generator2D : MonoBehaviour
             );
 
             Vector2Int roomSize = new Vector2Int(
-                random.Next(1, roomMaxSize.x + 1),
-                random.Next(1, roomMaxSize.y + 1)
+                2*random.Next(1, roomMaxSize.x+1)+1,
+                2*random.Next(1, roomMaxSize.y+1)+1
             );
 
             bool add = true;
@@ -108,6 +110,7 @@ public class Generator2D : MonoBehaviour
                 {
                     grid[pos] = CellType.Room;
                 }
+                roomCount--;
             }
         }
     }
@@ -215,6 +218,18 @@ public class Generator2D : MonoBehaviour
         }
     }
 
+    void PlaceRoom(Vector2Int location, Vector2Int size)
+    {
+        var positions = GetRoomPositions(location, size);
+        PlaceCube(positions[positions.Count / 2], size, redMaterial);
+    }
+
+    void PlaceHallway(Vector2Int location)
+    {
+        PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
+
+    }
+
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)
     {
         GameObject go = Instantiate(cubePrefab, new Vector3(location.x, 0, location.y), Quaternion.identity);
@@ -222,13 +237,18 @@ public class Generator2D : MonoBehaviour
         go.GetComponent<MeshRenderer>().material = material;
     }
 
-    void PlaceRoom(Vector2Int location, Vector2Int size)
+    List<Vector2Int> GetRoomPositions(Vector2Int location, Vector2Int size)
     {
-        PlaceCube(location, size, redMaterial);
-    }
+        List<Vector2Int> positions = new List<Vector2Int>();
 
-    void PlaceHallway(Vector2Int location)
-    {
-        PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
+        for (int x = location.x; x < location.x + size.x; x++)
+        {
+            for (int y = location.y; y < location.y + size.y; y++)
+            {
+                positions.Add(new Vector2Int(x, y));
+            }
+        }
+
+        return positions;
     }
 }
