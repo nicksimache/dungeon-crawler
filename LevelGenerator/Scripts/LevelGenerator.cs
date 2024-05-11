@@ -15,17 +15,20 @@ public class Generator2D : MonoBehaviour
         Room,
         MainHallway,
         Hallway,
-        Locked,
-        Unlocked
+        LockedDoor,
+        Door,
+        BossRoom
     }
 
     class Room
     {
         public RectInt bounds;
+        public bool bossRoom;
 
         public Room(Vector2Int location, Vector2Int size)
         {
             bounds = new RectInt(location, size);
+            bossRoom = false;
         }
 
         public static bool Intersect(Room a, Room b)
@@ -62,6 +65,10 @@ public class Generator2D : MonoBehaviour
     Material purpleMaterial;
     [SerializeField]
     Material greenMaterial;
+    [SerializeField]
+    Material orangeMaterial;
+    [SerializeField]
+    Material blackMaterial;
 
     Random random;
     Grid2D<CellType> grid;
@@ -80,18 +87,18 @@ public class Generator2D : MonoBehaviour
         grid = new Grid2D<CellType>(size, Vector2Int.zero);
         rooms = new List<Room>();
 
-        PlaceRooms(mandatoryRooms);
+        PlaceRooms(mandatoryRooms, true);
         Triangulate();
         CreateHallways(true);
         PathfindHallways(true);
 
-        PlaceRooms(optionalRooms);
+        PlaceRooms(optionalRooms, false);
         Triangulate();
         CreateHallways(false);
         PathfindHallways(false);
     }
 
-    void PlaceRooms(int roomCount)
+    void PlaceRooms(int roomCount, bool createMainRooms)
     {
         while(roomCount > 0)
         {
@@ -127,8 +134,17 @@ public class Generator2D : MonoBehaviour
             if (add)
             {
                 rooms.Add(newRoom);
-                PlaceRoom(newRoom.bounds.position, newRoom.bounds.size);
 
+                if (roomCount == 1 && createMainRooms)
+                {
+                    newRoom.bossRoom = true;
+                    PlaceBossRoom(newRoom.bounds.position, newRoom.bounds.size);
+                }
+                else
+                {
+                    PlaceRoom(newRoom.bounds.position, newRoom.bounds.size);
+                }
+                
                 foreach (var pos in newRoom.bounds.allPositionsWithin)
                 {
                     grid[pos] = CellType.Room;
@@ -216,19 +232,44 @@ public class Generator2D : MonoBehaviour
 
                 if(createMainHallways)
                 {
+
+                    bool madeDoorRoom = false;
+                    bool madeDoorRoomEnd = false;
+
                     for(int i = 0; i < path.Count; i++)
                     {
                         var current = path[i];
 
                         if (grid[current] == CellType.None)
                         {
-                            grid[current] = CellType.MainHallway;
+                            if(!madeDoorRoom && (grid[current] == CellType.Door || grid[current] == CellType.LockedDoor))
+                            {
+                                madeDoorRoom = true;
+                            }
+                            else if (!madeDoorRoom)
+                            {
+                                madeDoorRoom = true;
+                                grid[current] = CellType.Door;
+                            }
+                            else if (!madeDoorRoomEnd && grid[path[i + 1]] == CellType.Room)
+                            {
+                                madeDoorRoomEnd = true;
+                                grid[current] = CellType.Door;
+
+                            }
+                            else
+                            {
+                                grid[current] = CellType.MainHallway;
+                            }
                         }
+
+                        
                     }
                 }
                 else
                 {
                     bool madeLockedRoom = false;
+                    bool madeDoorRoomEnd = false;
 
                     for (int i = 0; i < path.Count; i++)
                     {
@@ -236,16 +277,28 @@ public class Generator2D : MonoBehaviour
 
                         if (grid[current] == CellType.None)
                         {
-                            if(madeLockedRoom)
+                            if (!madeLockedRoom && (grid[current] == CellType.Door || grid[current] == CellType.LockedDoor))
                             {
-                                grid[current] = CellType.Hallway;
+                                madeLockedRoom = true;
+                            }
+                            else if (!madeLockedRoom)
+                            {
+                                madeLockedRoom = true;
+                                grid[current] = CellType.LockedDoor;
+                            }
+                            else if (!madeDoorRoomEnd && grid[path[i + 1]] == CellType.Room)
+                            {
+                                madeDoorRoomEnd = true;
+                                grid[current] = CellType.Door;
+
                             }
                             else
                             {
-                                madeLockedRoom = true;
-                                grid[current] = CellType.Locked;
+                                grid[current] = CellType.Hallway;
                             }
                         }
+
+
                     }
                 }
 
@@ -259,9 +312,13 @@ public class Generator2D : MonoBehaviour
                     {
                         PlaceMainHallway(pos);
                     }
-                    else if (grid[pos] == CellType.Locked)
+                    else if (grid[pos] == CellType.LockedDoor)
                     {
                         PlaceLockedRoom(pos);
+                    }
+                    else if (grid[pos] == CellType.Door)
+                    {
+                        PlaceDoorRoom(pos);
                     }
 
                 }
@@ -275,6 +332,11 @@ public class Generator2D : MonoBehaviour
         PlaceCube(positions[positions.Count / 2], size, redMaterial);
     }
 
+    void PlaceBossRoom(Vector2Int location, Vector2Int size)
+    {
+        var positions = GetRoomPositions(location, size);
+        PlaceCube(positions[positions.Count / 2], size, blackMaterial);
+    }
     void PlaceHallway(Vector2Int location)
     {
         
@@ -285,6 +347,11 @@ public class Generator2D : MonoBehaviour
     void PlaceLockedRoom(Vector2Int location)
     {
         PlaceCube(location, new Vector2Int(1, 1), greenMaterial);
+    }
+
+    void PlaceDoorRoom(Vector2Int location)
+    {
+        PlaceCube(location, new Vector2Int(1, 1), orangeMaterial);
     }
 
     void PlaceMainHallway(Vector2Int location)
