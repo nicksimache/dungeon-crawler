@@ -13,6 +13,7 @@ public class Generator2D : MonoBehaviour
     {
         None,
         Room,
+        MainHallway,
         Hallway
     }
 
@@ -35,7 +36,9 @@ public class Generator2D : MonoBehaviour
     [SerializeField]
     Vector2Int size;
     [SerializeField]
-    int roomCount;
+    int mandatoryRooms;
+    [SerializeField]
+    int optionalRooms;
     [SerializeField]
     Vector2Int roomMaxSize;
     [SerializeField]
@@ -44,6 +47,8 @@ public class Generator2D : MonoBehaviour
     Material redMaterial;
     [SerializeField]
     Material blueMaterial;
+    [SerializeField]
+    Material purpleMaterial;
 
     Random random;
     Grid2D<CellType> grid;
@@ -62,13 +67,18 @@ public class Generator2D : MonoBehaviour
         grid = new Grid2D<CellType>(size, Vector2Int.zero);
         rooms = new List<Room>();
 
-        PlaceRooms();
+        PlaceRooms(mandatoryRooms);
         Triangulate();
-        CreateHallways();
-        PathfindHallways();
+        CreateHallways(true);
+        PathfindHallways(true);
+
+        PlaceRooms(optionalRooms);
+        Triangulate();
+        CreateHallways(false);
+        PathfindHallways(false);
     }
 
-    void PlaceRooms()
+    void PlaceRooms(int roomCount)
     {
         while(roomCount > 0)
         {
@@ -127,7 +137,7 @@ public class Generator2D : MonoBehaviour
         delaunay = Delaunay.Triangulate(vertices);
     }
 
-    void CreateHallways()
+    void CreateHallways(bool createMainHallways)
     {
         List<Prim.Edge> edges = new List<Prim.Edge>();
 
@@ -151,7 +161,7 @@ public class Generator2D : MonoBehaviour
         }
     }
 
-    void PathfindHallways()
+    void PathfindHallways(bool createMainHallways)
     {
         DungeonPathfinder aStar = new DungeonPathfinder(size);
 
@@ -178,7 +188,7 @@ public class Generator2D : MonoBehaviour
                 {
                     pathCost.cost += 5;
                 }
-                else if (grid[b.Position] == CellType.Hallway)
+                else if (grid[b.Position] == CellType.Hallway || grid[b.Position] == CellType.MainHallway)
                 {
                     pathCost.cost += 1;
                 }
@@ -196,7 +206,14 @@ public class Generator2D : MonoBehaviour
 
                     if (grid[current] == CellType.None)
                     {
-                        grid[current] = CellType.Hallway;
+                        if(createMainHallways)
+                        {
+                            grid[current] = CellType.MainHallway;
+                        }
+                        else
+                        {
+                            grid[current] = CellType.Hallway;
+                        }
                     }
 
                     if (i > 0)
@@ -213,6 +230,11 @@ public class Generator2D : MonoBehaviour
                     {
                         PlaceHallway(pos);
                     }
+                    else if (grid[pos] == CellType.MainHallway)
+                    {
+                        PlaceMainHallway(pos);
+                    }
+
                 }
             }
         }
@@ -228,6 +250,11 @@ public class Generator2D : MonoBehaviour
     {
         PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
 
+    }
+
+    void PlaceMainHallway(Vector2Int location)
+    {
+        PlaceCube(location, new Vector2Int(1,1), purpleMaterial);
     }
 
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)
