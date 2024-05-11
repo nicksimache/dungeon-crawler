@@ -13,7 +13,7 @@ Dungeon generation is completed. Each level features a set number of mandatory r
 - Green: Locked door
 - Orange: Unlocked door
 
-![Example Dungeon:][https://github.com/nicksimache/dungeon-crawler/blob/main/LevelGenerator/dungeongenerateexample.png]
+![Example Dungeon:](https://github.com/nicksimache/dungeon-crawler/blob/main/LevelGenerator/dungeongenerateexample.png)
 
 ## Enemy and Player Mechanics
 
