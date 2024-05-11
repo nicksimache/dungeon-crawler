@@ -14,7 +14,9 @@ public class Generator2D : MonoBehaviour
         None,
         Room,
         MainHallway,
-        Hallway
+        Hallway,
+        Locked,
+        Unlocked
     }
 
     class Room
@@ -31,6 +33,15 @@ public class Generator2D : MonoBehaviour
             return !((a.bounds.position.x >= (b.bounds.position.x + b.bounds.size.x)) || ((a.bounds.position.x + a.bounds.size.x) <= b.bounds.position.x)
                 || (a.bounds.position.y >= (b.bounds.position.y + b.bounds.size.y)) || ((a.bounds.position.y + a.bounds.size.y) <= b.bounds.position.y));
         }
+
+    }
+
+    public static class Vector2IntExtensions
+    {
+        public static readonly Vector2Int up = new Vector2Int(0, 1);
+        public static readonly Vector2Int down = new Vector2Int(0, -1);
+        public static readonly Vector2Int right = new Vector2Int(1, 0);
+        public static readonly Vector2Int left = new Vector2Int(-1, 0);
     }
 
     [SerializeField]
@@ -49,6 +60,8 @@ public class Generator2D : MonoBehaviour
     Material blueMaterial;
     [SerializeField]
     Material purpleMaterial;
+    [SerializeField]
+    Material greenMaterial;
 
     Random random;
     Grid2D<CellType> grid;
@@ -200,27 +213,39 @@ public class Generator2D : MonoBehaviour
 
             if (path != null)
             {
-                for (int i = 0; i < path.Count; i++)
-                {
-                    var current = path[i];
 
-                    if (grid[current] == CellType.None)
+                if(createMainHallways)
+                {
+                    for(int i = 0; i < path.Count; i++)
                     {
-                        if(createMainHallways)
+                        var current = path[i];
+
+                        if (grid[current] == CellType.None)
                         {
                             grid[current] = CellType.MainHallway;
                         }
-                        else
-                        {
-                            grid[current] = CellType.Hallway;
-                        }
                     }
+                }
+                else
+                {
+                    bool madeLockedRoom = false;
 
-                    if (i > 0)
+                    for (int i = 0; i < path.Count; i++)
                     {
-                        var prev = path[i - 1];
+                        var current = path[i];
 
-                        var delta = current - prev;
+                        if (grid[current] == CellType.None)
+                        {
+                            if(madeLockedRoom)
+                            {
+                                grid[current] = CellType.Hallway;
+                            }
+                            else
+                            {
+                                madeLockedRoom = true;
+                                grid[current] = CellType.Locked;
+                            }
+                        }
                     }
                 }
 
@@ -233,6 +258,10 @@ public class Generator2D : MonoBehaviour
                     else if (grid[pos] == CellType.MainHallway)
                     {
                         PlaceMainHallway(pos);
+                    }
+                    else if (grid[pos] == CellType.Locked)
+                    {
+                        PlaceLockedRoom(pos);
                     }
 
                 }
@@ -248,8 +277,14 @@ public class Generator2D : MonoBehaviour
 
     void PlaceHallway(Vector2Int location)
     {
+        
         PlaceCube(location, new Vector2Int(1, 1), blueMaterial);
 
+    }
+
+    void PlaceLockedRoom(Vector2Int location)
+    {
+        PlaceCube(location, new Vector2Int(1, 1), greenMaterial);
     }
 
     void PlaceMainHallway(Vector2Int location)
