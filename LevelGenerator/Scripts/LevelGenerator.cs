@@ -131,6 +131,15 @@ public class Generator2D : MonoBehaviour
                 add = false;
             }
 
+            foreach (var pos in newRoom.bounds.allPositionsWithin)
+            {
+                if (grid[pos] == CellType.MainHallway)
+                {
+                    add = false;
+                    break;
+                }
+            }
+
             if (add)
             {
                 rooms.Add(newRoom);
