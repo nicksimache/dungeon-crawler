@@ -28,7 +28,7 @@ public class Begin : MonoBehaviour
         grid = new Grid2D<type>(new Vector2Int(1000, 1000), new Vector2Int(500,500));
 
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 30; i++)
         {
 
             Vector2Int location = new Vector2Int(
@@ -37,12 +37,12 @@ public class Begin : MonoBehaviour
             );
 
             Vector2Int size = new Vector2Int(
-                random.Next(10, 30),
-                random.Next(10, 30)
+                random.Next(5, 6),
+                random.Next(5, 6)
 
             );
 
-            PlaceCube(location, size, red);
+            //PlaceCube(location, size, red);
 
             RectInt bounds = new RectInt(location, size);
 
@@ -70,8 +70,8 @@ public class Begin : MonoBehaviour
 
     void PlaceCube(Vector2Int location, Vector2Int size, Material material)
     {
-        GameObject go = Instantiate(cubePrefab, new Vector3(location.x, -10, location.y), Quaternion.identity);
-        go.GetComponent<Transform>().localScale = new Vector3(size.x, 100, size.y);
+        GameObject go = Instantiate(cubePrefab, new Vector3(location.x, -1, location.y), Quaternion.identity);
+        go.GetComponent<Transform>().localScale = new Vector3(size.x, 6, size.y);
         go.GetComponent<MeshRenderer>().material = material;
 
     }

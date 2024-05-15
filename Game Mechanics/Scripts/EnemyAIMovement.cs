@@ -6,11 +6,13 @@ using static UnityEngine.GraphicsBuffer;
 
 public class EnemyAI : MonoBehaviour
 {
+    private GameObject player;
     private Transform target;
     private NavMeshAgent navMeshAgent;
 
     [SerializeField] private float provokeRange = 30f;
     [SerializeField] private float disengageRange = 60f;
+    [SerializeField] private float attackRange = 3f;
     private float distanceToTarget = Mathf.Infinity;
 
     [SerializeField] private float turningSpeed = 5f;
@@ -19,27 +21,49 @@ public class EnemyAI : MonoBehaviour
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
+        navMeshAgent.stoppingDistance = attackRange;
 
-        target = GameObject.Find("Player").transform;
+        player = GameObject.Find("Player");
+        target = player.transform;
     }
 
     void Update()
     {
+
         distanceToTarget = Vector3.Distance(target.position, transform.position);
 
-        if (distanceToTarget <= provokeRange && !isProvoked)
+        var hit = new RaycastHit();
+        var rayDirection = (target.position - transform.position).normalized;
+
+        if (Physics.Raycast(transform.position, rayDirection, out hit, Mathf.Infinity))
         {
-            isProvoked = true;
-        }
-        else if (distanceToTarget <= disengageRange && isProvoked)
-        {
-            isProvoked= false;
+
+            if (hit.transform == player)
+            {
+                if (distanceToTarget <= provokeRange)
+                {
+                    isProvoked = true;
+                }
+                else if (distanceToTarget <= disengageRange)
+                {
+                    isProvoked = false;
+                }
+
+                if (isProvoked)
+                {
+                    moveToTarget();
+                }
+            }
+            else
+            {
+                Debug.Log("xsad");
+            }
+
         }
 
-        if (isProvoked)
-        {
-            moveToTarget();
-        }
+
+
+        
     }
 
     void moveToTarget()

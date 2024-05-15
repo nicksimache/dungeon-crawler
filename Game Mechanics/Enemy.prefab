@@ -46,10 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b46a7dc6ca1adcc439da3304ab9136d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  provokeRange: 10
-  disengageRange: 20
+  provokeRange: 30
+  attackRange: 3
+  disengageRange: 60
   turningSpeed: 5
   isProvoked: 0
+  isAttacking: 0
 --- !u!195 &1100050010680185160
 NavMeshAgent:
   m_ObjectHideFlags: 0
