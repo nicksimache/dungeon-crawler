@@ -9,7 +9,8 @@ public class EnemyAI : MonoBehaviour
     private Transform target;
     private NavMeshAgent navMeshAgent;
 
-    [SerializeField] private float range = 10f;
+    [SerializeField] private float provokeRange = 30f;
+    [SerializeField] private float disengageRange = 60f;
     private float distanceToTarget = Mathf.Infinity;
 
     [SerializeField] private float turningSpeed = 5f;
@@ -19,17 +20,20 @@ public class EnemyAI : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
 
-        GameObject playerObject = GameObject.Find("Player");
-        target = playerObject.transform;
+        target = GameObject.Find("Player").transform;
     }
 
     void Update()
     {
         distanceToTarget = Vector3.Distance(target.position, transform.position);
 
-        if (distanceToTarget <= range)
+        if (distanceToTarget <= provokeRange && !isProvoked)
         {
             isProvoked = true;
+        }
+        else if (distanceToTarget <= disengageRange && isProvoked)
+        {
+            isProvoked= false;
         }
 
         if (isProvoked)
@@ -53,7 +57,7 @@ public class EnemyAI : MonoBehaviour
     void lookAtTarget()
     {
         Vector3 direction = (target.position - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 1, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * turningSpeed);
     }
 }
