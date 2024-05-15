@@ -46,7 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b46a7dc6ca1adcc439da3304ab9136d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 10
+  provokeRange: 10
+  disengageRange: 20
   turningSpeed: 5
   isProvoked: 0
 --- !u!195 &1100050010680185160
@@ -68,7 +69,7 @@ NavMeshAgent:
   m_AutoBraking: 1
   m_AutoRepath: 1
   m_Height: 2
-  m_BaseOffset: 0
+  m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
 --- !u!1 &3544960577522884728
