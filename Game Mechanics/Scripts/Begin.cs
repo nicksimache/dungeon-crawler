@@ -4,19 +4,20 @@ using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
 using Random = System.Random;
-
+using BlueRaja;
 
 public class Begin : MonoBehaviour
 {
 
-    enum type
+    public enum type
     {
         empty,
         block
     }
 
     Random random;
-    Grid2D<type> grid;
+    public static Grid2D<type> grid;
+    List<GameObject> entityList;
 
     [SerializeField] private GameObject cubePrefab;
     [SerializeField] private GameObject enemyPrefab;
@@ -26,6 +27,7 @@ public class Begin : MonoBehaviour
     {
         random = new Random();
         grid = new Grid2D<type>(new Vector2Int(1000, 1000), new Vector2Int(500,500));
+        entityList = new List<GameObject>();
 
 
         for (int i = 0; i < 30; i++)
@@ -42,7 +44,7 @@ public class Begin : MonoBehaviour
 
             );
 
-            //PlaceCube(location, size, red);
+            PlaceCube(location, size, red);
 
             RectInt bounds = new RectInt(location, size);
 
@@ -64,7 +66,8 @@ public class Begin : MonoBehaviour
     {
         if (Input.GetKeyDown("x"))
         {
-            Instantiate(enemyPrefab, new Vector3Int(random.Next(-50, 50), 0, random.Next(-50, 50)), Quaternion.identity);
+            entityList.Add(Instantiate(enemyPrefab, new Vector3Int(random.Next(-50, 50), 0, random.Next(-50, 50)), Quaternion.identity));
+            
         }
     }
 

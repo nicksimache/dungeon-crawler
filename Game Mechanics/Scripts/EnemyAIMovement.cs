@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 using UnityEngine.AI;
 using static UnityEngine.GraphicsBuffer;
 
 public class EnemyAI : MonoBehaviour
 {
+
     private GameObject player;
     private Transform target;
     private NavMeshAgent navMeshAgent;
@@ -29,34 +31,74 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
-
         float distanceToTarget = Vector3.Distance(target.position, transform.position);
-        RaycastHit hit;
-        Vector3 rayDirection = (target.position - transform.position).normalized;
 
-        if (Physics.Raycast(transform.position, rayDirection, out hit, Mathf.Infinity))
+        if (distanceToTarget <= provokeRange)
         {
-            if (hit.transform.CompareTag("Player"))
-            {
-                if (distanceToTarget <= provokeRange)
-                {
-                    isProvoked = true;
-                }
-                else if (distanceToTarget <= disengageRange)
-                {
-                    isProvoked = false;
-                }
+            isProvoked = true;
+        }
+        else if(distanceToTarget <= disengageRange)
+        {
+            isProvoked = false;
+        }
 
-                if (isProvoked)
+        if (isProvoked)
+        {
+            RaycastHit hit;
+            Vector3 rayDirection = (target.position - transform.position).normalized;
+
+            if (Physics.Raycast(transform.position, rayDirection, out hit, Mathf.Infinity))
+            {
+                if (hit.transform.CompareTag("Player"))
                 {
                     moveToTarget();
                 }
+                else
+                {
+                    AStar aStar = new AStar(new Vector2Int(1000, 1000));
+
+                    var startPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
+                    var endPos = new Vector2Int((int)target.position.x, (int)target.position.y);
+
+                    var path = aStar.FindPath(startPos, endPos, (AStar.Node a, AStar.Node b) =>
+                    {
+
+                        var pathCost = new AStar.PathCost();
+
+                        pathCost.cost = Vector2Int.Distance(b.Position, endPos);
+
+                        if (Begin.grid[b.Position] == Begin.type.block)
+                        {
+                            pathCost.cost += 10;
+                        }
+                        else if (Begin.grid[b.Position] == Begin.type.empty)
+                        {
+                            pathCost.cost += 1;
+                        }
+
+                        pathCost.traversable = true;
+
+                        return pathCost;
+
+
+                    });
+
+                    if (path != null)
+                    {
+                        for (int i = 0; i < path.Count; i++)
+                        {
+                            var current = path[i];
+
+                            moveToLocation(new Vector3Int(current.x, 0, current.y));
+                        }
+                    }
+
+                }
             }
-            else
-            {
-                Debug.Log("Raycast hit something else: " + hit.transform.name);
-            }
+
+
         }
+        
     }
 
     void moveToTarget()
@@ -69,6 +111,11 @@ public class EnemyAI : MonoBehaviour
 
         }
 
+    }
+
+    void moveToLocation(Vector3Int pos)
+    {
+        navMeshAgent.SetDestination(pos);
     }
 
     void lookAtTarget()
