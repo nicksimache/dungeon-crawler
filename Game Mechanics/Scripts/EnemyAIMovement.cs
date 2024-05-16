@@ -30,15 +30,13 @@ public class EnemyAI : MonoBehaviour
     void Update()
     {
 
-        distanceToTarget = Vector3.Distance(target.position, transform.position);
-
-        var hit = new RaycastHit();
-        var rayDirection = (target.position - transform.position).normalized;
+        float distanceToTarget = Vector3.Distance(target.position, transform.position);
+        RaycastHit hit;
+        Vector3 rayDirection = (target.position - transform.position).normalized;
 
         if (Physics.Raycast(transform.position, rayDirection, out hit, Mathf.Infinity))
         {
-
-            if (hit.transform == player)
+            if (hit.transform.CompareTag("Player"))
             {
                 if (distanceToTarget <= provokeRange)
                 {
@@ -56,14 +54,9 @@ public class EnemyAI : MonoBehaviour
             }
             else
             {
-                Debug.Log("xsad");
+                Debug.Log("Raycast hit something else: " + hit.transform.name);
             }
-
         }
-
-
-
-        
     }
 
     void moveToTarget()
