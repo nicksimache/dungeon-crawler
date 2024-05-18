@@ -84,7 +84,7 @@ public class Generator2D : MonoBehaviour
     void Generate()
     {
         random = new Random();
-        grid = new Grid2D<CellType>(size, Vector2Int.zero);
+        grid = new Grid2D<CellType>(size + new Vector2Int(20,20), Vector2Int.zero);
         rooms = new List<Room>();
 
         PlaceRooms(mandatoryRooms, true);
@@ -355,12 +355,12 @@ public class Generator2D : MonoBehaviour
 
     void PlaceLockedRoom(Vector2Int location)
     {
-        PlaceCube(location, new Vector2Int(1, 1), greenMaterial);
+        PlaceCube(location, new Vector2Int(1, 1), orangeMaterial);
     }
 
     void PlaceDoorRoom(Vector2Int location)
     {
-        PlaceCube(location, new Vector2Int(1, 1), orangeMaterial);
+        PlaceCube(location, new Vector2Int(1, 1), greenMaterial);
     }
 
     void PlaceMainHallway(Vector2Int location)
