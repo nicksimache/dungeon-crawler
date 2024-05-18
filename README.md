@@ -10,8 +10,8 @@ Dungeon generation is completed. Each level features a set number of mandatory r
 - Black: Boss room
 - Purple: Main hallways that never lead to locked doors
 - Blue: Optional hallways that can lead to locked doors
-- Green: Locked door
-- Orange: Unlocked door
+- Green: Unlocked door
+- Orange: Locked door
 
 ![Example Dungeon:](https://github.com/nicksimache/dungeon-crawler/blob/main/LevelGenerator/dungeongenerateexample.png)
 
